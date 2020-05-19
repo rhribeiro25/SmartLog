@@ -6,14 +6,18 @@ Escrever uma aplicação Java para fazer upload de arquivo de log e popular o ba
 uma interface para listar/consultar/pesquisar os logs, e uma ultima interface com formulário
 para inserção manual de log. Implemente o back-end com (Spring ou JavaEE) e front-end (JSP
 ou SPA) (front-end em Angular será considerado um diferencial).
+
 DETALHES DO BACK-END:
+-----------
 - Definir o modelo de dados no PostgreSQL;
 - Definir serviços para a inserção em batch (usando o arquivo de logs fornecido,
 usando JPA);
 - Definir serviços para a inserção de logs manuais (CRUD);
 - Implementar filtros ou pesquisas de logs;
 - (BÔNUS) Testes automatizados;
+
 DETALHES DO FRONT-END:
+-----------
 - Tela para inserção de logs manuais (CRUD);
 - Tela para inserção de logs usando o arquivo modelo;
 - Tela para buscar logs feitos por um determinado IP e por um intervalo de tempo;
