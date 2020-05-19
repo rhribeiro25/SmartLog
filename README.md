@@ -19,11 +19,13 @@ DETALHES DO FRONT-END:
 - Tela para buscar logs feitos por um determinado IP e por um intervalo de tempo;
 - (BÔNUS) Dashboard para exibir o número de requests feitos por um determinado IP,
 por hora, user-agent (agregação);
+
 FORMATO LOG
 -----------
 Data, IP, Request, Status, User Agent (delimitado por aspas duplas);
 O delimitador do arquivo de log é o caracter pipe (|);
 Formato de data: "yyyy-MM-dd HH:mm:ss.SSS";
+
 ENTREGAS
 --------
 (1) Aplicação JavaWEB (Spring ou JavaEE).
