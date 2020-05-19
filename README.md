@@ -29,11 +29,8 @@ Formato de data: "yyyy-MM-dd HH:mm:ss.SSS";
 ENTREGAS
 --------
 (1) Aplicação JavaWEB (Spring ou JavaEE).
+
 (2) Código Fonte da aplicação (back-end e front-end).
+
 (3) Esquema do PostgreSQL usado para os dados de log.
-Importante: Tempo para realização do teste é de 7 dias corridos, teste completo vale mais
-pontos, mas não se preocupe caso não consiga terminar todos os itens, visto que o foco se
-consiste nas premissas abaixo.
-Qualidade do código, Lógica e Organização;
-Ao finalizar a entrega do desafio, use um repositório privado no GitHub e compartilhe com os
-usuários: mhbpcuiaba e geovannefduarte.
+
