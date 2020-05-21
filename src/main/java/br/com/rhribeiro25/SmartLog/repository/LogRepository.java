@@ -1,16 +1,6 @@
 package br.com.rhribeiro25.SmartLog.repository;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import br.com.rhribeiro25.SmartLog.model.LogModel;
 
@@ -19,8 +9,5 @@ import br.com.rhribeiro25.SmartLog.model.LogModel;
  * @date 18/05/2020.
  */
 
-@Repository
-public class LogRepository {
-
-	
+public interface LogRepository extends JpaRepository<LogModel, Long> {
 }
