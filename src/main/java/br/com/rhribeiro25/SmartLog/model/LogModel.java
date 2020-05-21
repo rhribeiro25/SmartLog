@@ -19,7 +19,7 @@ public class LogModel {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long _id;
+	private Long id;
 	private Date createdAt;
 	private String ip;
 	private String request;
@@ -30,7 +30,7 @@ public class LogModel {
 	}
 
 	public LogModel(Long id, Date createdAt, String ip, String request, Integer status, String userAgent) {
-		this._id = id;
+		this.id = id;
 		this.createdAt = createdAt;
 		this.ip = ip;
 		this.request = request;
@@ -48,12 +48,12 @@ public class LogModel {
 
 	@Override
 	public String toString() {
-		return "LogModel [id=" + _id + ", createdAt=" + createdAt + ", ip=" + ip + ", request=" + request + ", status="
+		return "LogModel [id=" + id + ", createdAt=" + createdAt + ", ip=" + ip + ", request=" + request + ", status="
 				+ status + ", userAgent=" + userAgent + "]";
 	}
 
 	public Long getId() {
-		return _id;
+		return id;
 	}
 
 	public Date getCreatedAt() {

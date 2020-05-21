@@ -1,6 +1,7 @@
 package br.com.rhribeiro25.SmartLog.service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import br.com.rhribeiro25.SmartLog.model.LogModel;
 import br.com.rhribeiro25.SmartLog.repository.LogRepository;
+import br.com.rhribeiro25.SmartLog.utils.Formatting;
 
 /**
  * @author Renan Ribeiro
@@ -33,7 +35,19 @@ public class LogServiceImpl implements LogService {
 	}
 
 	@Override
-	public LogModel save(LogModel logModel) {
+	public List<LogModel> findByParams(String param) {
+		return logRepository.findLogModelsByIpIsContainingOrRequestIsContainingOrUserAgentIsContaining(param, param, param);
+	}
+
+	@Override
+	public List<LogModel> findByCreatedAtBetween(String from, String to) {
+		Date dateFrom = Formatting.stringToDate_yyyy_MM_dd__HH_mm_ss(from);
+		Date dateTo = Formatting.stringToDate_yyyy_MM_dd__HH_mm_ss(to);
+		return logRepository.findLogModelsByCreatedAtBetween(dateFrom, dateTo);
+	}
+
+	@Override
+	public LogModel saveOrUpdate(LogModel logModel) {
 		logRepository.save(logModel);
 		return logModel;
 	}
@@ -45,8 +59,9 @@ public class LogServiceImpl implements LogService {
 	}
 
 	@Override
-	public void delete(Long id) {
-		logRepository.deleteById(id);
+	public LogModel delete(LogModel logModel) {
+		logRepository.delete(logModel);
+		return logModel;
 	}
 
 }

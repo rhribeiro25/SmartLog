@@ -1,7 +1,7 @@
 package br.com.rhribeiro25.SmartLog.controller;
 
-import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.batch.core.BatchStatus;
@@ -15,11 +15,14 @@ import org.springframework.batch.core.repository.JobExecutionAlreadyRunningExcep
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.server.ErrorPage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,44 +41,137 @@ public class LogController {
 
 	@Autowired
 	private LogService logService;
-	
-    @Autowired
-    JobLauncher jobLauncher;
 
-    @Autowired
-    Job job;
-    
-    @GetMapping("/run-batch")
-    public BatchStatus saveLogsFromFile() throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
-        Map<String, JobParameter> maps = new HashMap<>();
-        maps.put("time", new JobParameter(System.currentTimeMillis()));
-        JobParameters parameters = new JobParameters(maps);
-        JobExecution jobExecution = jobLauncher.run(job, parameters);
+	@Autowired
+	JobLauncher jobLauncher;
 
-        System.out.println("JobExecution: " + jobExecution.getStatus());
+	@Autowired
+	Job job;
 
-        System.out.println("Batch is Running...");
-        while (jobExecution.isRunning()) {
-            System.out.println("...");
-        }
-        return jobExecution.getStatus();
-    }
+	@PostMapping("/create-by-batch")
+	public ResponseEntity<Object> saveLogsFromFile() throws JobParametersInvalidException,
+			JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
+		Map<String, JobParameter> maps = new HashMap<>();
+		maps.put("time", new JobParameter(System.currentTimeMillis()));
+		JobParameters parameters = new JobParameters(maps);
+		JobExecution jobExecution = jobLauncher.run(job, parameters);
 
-	@GetMapping("/")
-	public ResponseEntity<String> findBestPrice(@PathVariable("from-to") String from_to) throws IOException {
+		BatchStatus status = jobExecution.getStatus();
+		System.out.println("JobExecution: " + status);
+
+		System.out.println("Batch is Running...");
+		while (jobExecution.isRunning()) {
+			System.out.println("...");
+		}
+		if (status == BatchStatus.COMPLETED)
+			return new ResponseEntity<>(status.toString(), HttpStatus.CREATED);
+		else if (status == BatchStatus.FAILED)
+			return new ResponseEntity<>(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, status.toString()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		else
+			return new ResponseEntity<>(new ErrorPage(HttpStatus.BAD_REQUEST, status.toString()),
+					HttpStatus.BAD_REQUEST);
+	}
+
+	@GetMapping("/find-by-id/{id}")
+	public ResponseEntity<Object> findById(@PathVariable("id") Long id) {
 		try {
-			return new ResponseEntity<>("", HttpStatus.OK);
+			LogModel logModel = logService.findById(id);
+			if (logModel == null)
+				return new ResponseEntity<>(new ErrorPage(HttpStatus.NOT_FOUND, "Failed to finding Log!"),
+						HttpStatus.NOT_FOUND);
+			else
+				return new ResponseEntity<>(logModel, HttpStatus.FOUND);
 		} catch (Exception e) {
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
-	@PostMapping
-	public ResponseEntity<String> saveRoute(@RequestBody LogModel route) throws IOException {
+	@GetMapping("/find-all")
+	public ResponseEntity<Object> findAll() {
 		try {
-			return new ResponseEntity<>("", HttpStatus.BAD_REQUEST);
+			List<LogModel> logs = logService.findAll();
+			if (logs == null || logs.size() == 0)
+				return new ResponseEntity<>(new ErrorPage(HttpStatus.NOT_FOUND, "Failed to finding Logs!"),
+						HttpStatus.NOT_FOUND);
+			else
+				return new ResponseEntity<>(logs, HttpStatus.FOUND);
 		} catch (Exception e) {
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@GetMapping("/find-by-params")
+	public ResponseEntity<Object> findByParams(@RequestBody String param) {
+		try {
+			List<LogModel> logs = logService.findByParams(param);
+			if (logs == null || logs.size() == 0)
+				return new ResponseEntity<>(new ErrorPage(HttpStatus.NOT_FOUND, "Failed to finding Logs!"),
+						HttpStatus.NOT_FOUND);
+			else
+				return new ResponseEntity<>(logs, HttpStatus.FOUND);
+		} catch (Exception e) {
+			return new ResponseEntity<>(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@GetMapping("/find-by-createdat-between/{from}/{to}")
+	public ResponseEntity<Object> findByCreatedAtBetween(@PathVariable("from") String from,
+			@PathVariable("to") String to) {
+		try {
+			List<LogModel> logs = logService.findByCreatedAtBetween(from, to);
+			if (logs == null || logs.size() == 0)
+				return new ResponseEntity<>(new ErrorPage(HttpStatus.NOT_FOUND, "Failed to finding Logs!"),
+						HttpStatus.NOT_FOUND);
+			else
+				return new ResponseEntity<>(logs, HttpStatus.FOUND);
+		} catch (Exception e) {
+			return new ResponseEntity<>(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@PostMapping("/create")
+	public ResponseEntity<Object> save(@RequestBody LogModel logModel) {
+		try {
+			logService.saveOrUpdate(logModel);
+			return new ResponseEntity<>(logModel, HttpStatus.CREATED);
+		} catch (Exception e) {
+			return new ResponseEntity<>(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@PutMapping("/update")
+	public ResponseEntity<Object> update(@RequestBody LogModel logModel) {
+		try {
+			logService.saveOrUpdate(logModel);
+			if (logModel == null)
+				return new ResponseEntity<>(new ErrorPage(HttpStatus.NOT_FOUND, "Failed to delete, log not found!"),
+						HttpStatus.NOT_FOUND);
+			else
+				return new ResponseEntity<>(logModel, HttpStatus.OK);
+		} catch (Exception e) {
+			return new ResponseEntity<>(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@DeleteMapping("/delete")
+	public ResponseEntity<Object> delete(@RequestBody LogModel logModel) {
+		try {
+			logService.delete(logModel);
+			if (logModel == null)
+				return new ResponseEntity<>(new ErrorPage(HttpStatus.NOT_FOUND, "Failed to delete, log not found!"),
+						HttpStatus.NOT_FOUND);
+			else
+				return new ResponseEntity<>("Successful to deleting log!", HttpStatus.OK);
+		} catch (Exception e) {
+			return new ResponseEntity<>(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 }

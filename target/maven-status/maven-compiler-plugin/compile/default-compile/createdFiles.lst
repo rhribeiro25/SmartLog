@@ -1,7 +1,6 @@
 br\com\rhribeiro25\SmartLog\SmartLogApplication.class
 br\com\rhribeiro25\SmartLog\spring\batch\LogItemProcessor.class
 br\com\rhribeiro25\SmartLog\spring\batch\LogFieldSetMapper.class
-br\com\rhribeiro25\SmartLog\service\LogServiceImpl.class
 br\com\rhribeiro25\SmartLog\service\LogService.class
 br\com\rhribeiro25\SmartLog\spring\batch\LogItemWriter.class
 br\com\rhribeiro25\SmartLog\repository\LogRepository.class

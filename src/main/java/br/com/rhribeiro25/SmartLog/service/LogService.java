@@ -14,10 +14,14 @@ public interface LogService {
 	
 	public LogModel findById(Long id);
 	
-	public LogModel save(LogModel logModel);
+	public LogModel saveOrUpdate(LogModel logModel);
 	
-	public void delete(Long id);
+	public LogModel delete(LogModel logModel);
 
 	public List<LogModel> saveAll(List<? extends LogModel> logs);
+
+	public List<LogModel> findByCreatedAtBetween(String from, String to);
 	
+	public List<LogModel> findByParams(String param);
+
 }
