@@ -4,6 +4,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * @author Renan Ribeiro
+ * @date 18/05/2020.
+ */
+
 public class Formatting {
 
 	public static Date stringToDate_yyyy_MM_dd__HH_mm_ss(String date) {

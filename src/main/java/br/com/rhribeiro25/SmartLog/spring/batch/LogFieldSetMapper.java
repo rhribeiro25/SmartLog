@@ -8,6 +8,11 @@ import org.springframework.batch.item.file.transform.FieldSet;
 import br.com.rhribeiro25.SmartLog.model.LogModel;
 import br.com.rhribeiro25.SmartLog.utils.Formatting;
 
+/**
+ * @author Renan Ribeiro
+ * @date 18/05/2020.
+ */
+
 public class LogFieldSetMapper implements FieldSetMapper<LogModel> {
 
 	@Override

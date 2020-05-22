@@ -63,5 +63,10 @@ public class LogServiceImpl implements LogService {
 		logRepository.delete(logModel);
 		return logModel;
 	}
+	
+	@Override
+	public boolean existsById(Long id) {
+		return logRepository.existsById(id);
+	}
 
 }

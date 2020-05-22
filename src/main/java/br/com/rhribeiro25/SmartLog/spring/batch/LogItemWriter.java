@@ -1,14 +1,18 @@
 package br.com.rhribeiro25.SmartLog.spring.batch;
 
+import java.util.List;
+
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import br.com.rhribeiro25.SmartLog.model.LogModel;
-import br.com.rhribeiro25.SmartLog.repository.LogRepository;
 import br.com.rhribeiro25.SmartLog.service.LogService;
 
-import java.util.List;
+/**
+ * @author Renan Ribeiro
+ * @date 18/05/2020.
+ */
 
 @Component
 public class LogItemWriter implements ItemWriter<LogModel> {

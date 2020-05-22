@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: br.com.rhribeiro25.SmartLog.SmartLogApplicationTests
 -------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.242 s - in br.com.rhribeiro25.SmartLog.SmartLogApplicationTests
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.808 s - in br.com.rhribeiro25.SmartLog.SmartLogApplicationTests

@@ -21,6 +21,11 @@ import org.springframework.core.io.FileSystemResource;
 import br.com.rhribeiro25.SmartLog.model.LogModel;
 import br.com.rhribeiro25.SmartLog.spring.batch.LogFieldSetMapper;
 
+/**
+ * @author Renan Ribeiro
+ * @date 18/05/2020.
+ */
+
 @Configuration
 @EnableBatchProcessing
 public class SpringBatchConfig {

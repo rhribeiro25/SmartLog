@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.server.ErrorPage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,28 +50,34 @@ public class LogController {
 	Job job;
 
 	@PostMapping("/create-by-batch")
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<Object> saveLogsFromFile() throws JobParametersInvalidException,
 			JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
-		Map<String, JobParameter> maps = new HashMap<>();
-		maps.put("time", new JobParameter(System.currentTimeMillis()));
-		JobParameters parameters = new JobParameters(maps);
-		JobExecution jobExecution = jobLauncher.run(job, parameters);
+		try {
+			Map<String, JobParameter> maps = new HashMap<>();
+			maps.put("time", new JobParameter(System.currentTimeMillis()));
+			JobParameters parameters = new JobParameters(maps);
+			JobExecution jobExecution = jobLauncher.run(job, parameters);
 
-		BatchStatus status = jobExecution.getStatus();
-		System.out.println("JobExecution: " + status);
+			BatchStatus status = jobExecution.getStatus();
+			System.out.println("JobExecution: " + status);
 
-		System.out.println("Batch is Running...");
-		while (jobExecution.isRunning()) {
-			System.out.println("...");
-		}
-		if (status == BatchStatus.COMPLETED)
-			return new ResponseEntity<>(status.toString(), HttpStatus.CREATED);
-		else if (status == BatchStatus.FAILED)
-			return new ResponseEntity<>(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, status.toString()),
+			System.out.println("Batch is Running...");
+			while (jobExecution.isRunning()) {
+				System.out.println("...");
+			}
+			if (status == BatchStatus.COMPLETED)
+				return new ResponseEntity<>(status.toString(), HttpStatus.CREATED);
+			else if (status == BatchStatus.FAILED)
+				return new ResponseEntity<>(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, status.toString()),
+						HttpStatus.INTERNAL_SERVER_ERROR);
+			else
+				return new ResponseEntity<>(new ErrorPage(HttpStatus.BAD_REQUEST, status.toString()),
+						HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			return new ResponseEntity<>(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
-		else
-			return new ResponseEntity<>(new ErrorPage(HttpStatus.BAD_REQUEST, status.toString()),
-					HttpStatus.BAD_REQUEST);
+		}
 	}
 
 	@GetMapping("/find-by-id/{id}")
@@ -81,7 +88,7 @@ public class LogController {
 				return new ResponseEntity<>(new ErrorPage(HttpStatus.NOT_FOUND, "Failed to finding Log!"),
 						HttpStatus.NOT_FOUND);
 			else
-				return new ResponseEntity<>(logModel, HttpStatus.FOUND);
+				return new ResponseEntity<>(logModel, HttpStatus.OK);
 		} catch (Exception e) {
 			return new ResponseEntity<>(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
@@ -96,22 +103,22 @@ public class LogController {
 				return new ResponseEntity<>(new ErrorPage(HttpStatus.NOT_FOUND, "Failed to finding Logs!"),
 						HttpStatus.NOT_FOUND);
 			else
-				return new ResponseEntity<>(logs, HttpStatus.FOUND);
+				return new ResponseEntity<>(logs, HttpStatus.OK);
 		} catch (Exception e) {
 			return new ResponseEntity<>(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
-	@GetMapping("/find-by-params")
-	public ResponseEntity<Object> findByParams(@RequestBody String param) {
+	@GetMapping("/find-by-params/{param}")
+	public ResponseEntity<Object> findByParams(@PathVariable String param) {
 		try {
 			List<LogModel> logs = logService.findByParams(param);
 			if (logs == null || logs.size() == 0)
 				return new ResponseEntity<>(new ErrorPage(HttpStatus.NOT_FOUND, "Failed to finding Logs!"),
 						HttpStatus.NOT_FOUND);
 			else
-				return new ResponseEntity<>(logs, HttpStatus.FOUND);
+				return new ResponseEntity<>(logs, HttpStatus.OK);
 		} catch (Exception e) {
 			return new ResponseEntity<>(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
@@ -127,7 +134,7 @@ public class LogController {
 				return new ResponseEntity<>(new ErrorPage(HttpStatus.NOT_FOUND, "Failed to finding Logs!"),
 						HttpStatus.NOT_FOUND);
 			else
-				return new ResponseEntity<>(logs, HttpStatus.FOUND);
+				return new ResponseEntity<>(logs, HttpStatus.OK);
 		} catch (Exception e) {
 			return new ResponseEntity<>(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
@@ -135,10 +142,16 @@ public class LogController {
 	}
 
 	@PostMapping("/create")
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<Object> save(@RequestBody LogModel logModel) {
 		try {
-			logService.saveOrUpdate(logModel);
-			return new ResponseEntity<>(logModel, HttpStatus.CREATED);
+			if (logService.existsById(logModel.getId())) {
+				return new ResponseEntity<>(new ErrorPage(HttpStatus.BAD_REQUEST, "Failed because Log already exists!"),
+						HttpStatus.BAD_REQUEST);
+			} else {
+				logService.saveOrUpdate(logModel);
+				return new ResponseEntity<>(logModel, HttpStatus.CREATED);
+			}
 		} catch (Exception e) {
 			return new ResponseEntity<>(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
@@ -146,14 +159,16 @@ public class LogController {
 	}
 
 	@PutMapping("/update")
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<Object> update(@RequestBody LogModel logModel) {
 		try {
-			logService.saveOrUpdate(logModel);
-			if (logModel == null)
-				return new ResponseEntity<>(new ErrorPage(HttpStatus.NOT_FOUND, "Failed to delete, log not found!"),
+			if (!logService.existsById(logModel.getId())) {
+				return new ResponseEntity<>(new ErrorPage(HttpStatus.NOT_FOUND, "Failed to finding Log!"),
 						HttpStatus.NOT_FOUND);
-			else
+			} else {
+				logService.saveOrUpdate(logModel);
 				return new ResponseEntity<>(logModel, HttpStatus.OK);
+			}
 		} catch (Exception e) {
 			return new ResponseEntity<>(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
@@ -161,14 +176,16 @@ public class LogController {
 	}
 
 	@DeleteMapping("/delete")
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<Object> delete(@RequestBody LogModel logModel) {
 		try {
-			logService.delete(logModel);
-			if (logModel == null)
+			if (!logService.existsById(logModel.getId())) {
 				return new ResponseEntity<>(new ErrorPage(HttpStatus.NOT_FOUND, "Failed to delete, log not found!"),
 						HttpStatus.NOT_FOUND);
-			else
+			} else {
+				logService.delete(logModel);
 				return new ResponseEntity<>("Successful to deleting log!", HttpStatus.OK);
+			}
 		} catch (Exception e) {
 			return new ResponseEntity<>(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);

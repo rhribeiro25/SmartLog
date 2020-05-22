@@ -7,5 +7,6 @@ D:\OneDrive\Music\SmartLog\src\main\java\br\com\rhribeiro25\SmartLog\service\Log
 D:\OneDrive\Music\SmartLog\src\main\java\br\com\rhribeiro25\SmartLog\spring\batch\LogFieldSetMapper.java
 D:\OneDrive\Music\SmartLog\src\main\java\br\com\rhribeiro25\SmartLog\SmartLogApplication.java
 D:\OneDrive\Music\SmartLog\src\main\java\br\com\rhribeiro25\SmartLog\spring\batch\LogItemProcessor.java
+D:\OneDrive\Music\SmartLog\src\main\java\br\com\rhribeiro25\SmartLog\spring\config\SpringSecurityConfig.java
 D:\OneDrive\Music\SmartLog\src\main\java\br\com\rhribeiro25\SmartLog\service\LogService.java
 D:\OneDrive\Music\SmartLog\src\main\java\br\com\rhribeiro25\SmartLog\spring\config\SpringBatchConfig.java

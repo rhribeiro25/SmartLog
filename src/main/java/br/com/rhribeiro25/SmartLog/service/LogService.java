@@ -24,4 +24,6 @@ public interface LogService {
 	
 	public List<LogModel> findByParams(String param);
 
+	public boolean existsById(Long id);
+
 }
