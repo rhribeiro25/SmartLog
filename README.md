@@ -42,10 +42,10 @@ Detalhes do desenvolvimento
 --------
 Será disponibilizado um postmanCollection para testes da API em ".\src\main\resources\postmanCollection".
 Utilizar as autenticações abaixo diretamente no postman:
-(A) Leitura
+(1) Leitura
 - User: user
 - password: smartLog2020
-(B) Gravação
+(2) Gravação
 - User: admin
 - password: smartLog2020
 
