@@ -16,7 +16,7 @@ public interface LogService {
 	
 	public LogModel saveOrUpdate(LogModel logModel);
 	
-	public LogModel delete(LogModel logModel);
+	public void delete(Long id);
 
 	public List<LogModel> saveAll(List<? extends LogModel> logs);
 

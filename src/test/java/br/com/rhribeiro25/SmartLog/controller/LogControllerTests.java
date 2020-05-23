@@ -1,11 +1,16 @@
 package br.com.rhribeiro25.SmartLog.controller;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
+import org.assertj.core.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,9 +24,13 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import br.com.rhribeiro25.SmartLog.model.LogModel;
 import br.com.rhribeiro25.SmartLog.repository.LogRepository;
@@ -71,12 +80,13 @@ public class LogControllerTests {
 		logs.add(new LogModel(8L, Formatting.stringToDate_yyyy_MM_dd__HH_mm_ss("2020-01-08 00:00:23.003"), "192.168.169.198", "GET / HTTP/1.1", 400, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.79 Safari/537.36 Edge/14.14393"));
 		logs.add(new LogModel(9L, Formatting.stringToDate_yyyy_MM_dd__HH_mm_ss("2020-01-09 00:00:23.003"), "192.168.169.199", "GET / HTTP/1.1", 404, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.79 Safari/537.36 Edge/14.14393"));
 		logs.add(new LogModel(10L, Formatting.stringToDate_yyyy_MM_dd__HH_mm_ss("2020-01-10 00:00:23.003"), "192.168.169.200", "GET / HTTP/1.1", 500, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.79 Safari/537.36 Edge/14.14393"));
-		logModel = new LogModel(1L, Formatting.stringToDate_yyyy_MM_dd__HH_mm_ss("2020-01-01 00:00:23.003"), "192.168.169.194", "GET / HTTP/1.1", 200, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.79 Safari/537.36 Edge/14.14393");
+		logModel = new LogModel(11L, Formatting.stringToDate_yyyy_MM_dd__HH_mm_ss("2020-01-01 00:00:23.003"), "192.168.169.194", "GET / HTTP/1.1", 200, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.79 Safari/537.36 Edge/14.14393");
 		
 		from = Formatting.stringToDate_yyyy_MM_dd__HH_mm_ss("2020-01-01 00:00:23.003");
 		to = Formatting.stringToDate_yyyy_MM_dd__HH_mm_ss("2020-01-05 00:00:23.003");
 		
 		request = new HttpEntity<>(logModel);
+		
 	}
 
 	/**
@@ -84,8 +94,8 @@ public class LogControllerTests {
 	 */
 	@Test
 	public void findByIdHttpStatus200() {
-		BDDMockito.when(logRepository.findById(1L)).thenReturn(Optional.of(logModel));
-		ResponseEntity<LogModel> response = restTemplate.getForEntity("/logs/find-by-id/1", LogModel.class);
+		BDDMockito.when(logRepository.findById(11L)).thenReturn(Optional.of(logModel));
+		ResponseEntity<LogModel> response = restTemplate.getForEntity("/logs/find-by-id/11", LogModel.class);
 		Assertions.assertThat(response.getBody().getUserAgent()).isEqualTo(logModel.getUserAgent());
 		Assertions.assertThat(response.getStatusCodeValue()).isEqualTo(200);
 	}
@@ -93,21 +103,21 @@ public class LogControllerTests {
 	@Test
 	public void findByIdHttpStatus401() {
 		restTemplate = restTemplate.withBasicAuth("test", "test");
-		BDDMockito.when(logRepository.findById(1L)).thenReturn(Optional.of(logModel));
-		ResponseEntity<String> response = restTemplate.getForEntity("/logs/find-by-id/1", String.class);
+		BDDMockito.when(logRepository.findById(11L)).thenReturn(Optional.of(logModel));
+		ResponseEntity<String> response = restTemplate.getForEntity("/logs/find-by-id/11", String.class);
 		Assertions.assertThat(response.getStatusCodeValue()).isEqualTo(401);
 	}
 	
 	@Test
 	public void findByIdHttpStatus404() {
-		BDDMockito.when(logRepository.findById(1L)).thenReturn(Optional.of(logModel));
+		BDDMockito.when(logRepository.findById(11L)).thenReturn(Optional.of(logModel));
 		ResponseEntity<String> response = restTemplate.getForEntity("/logs/find-by-id/2", String.class);
 		Assertions.assertThat(response.getStatusCodeValue()).isEqualTo(404);
 	}
 	
 	@Test
 	public void findByIdHttpStatus400() {
-		BDDMockito.when(logRepository.findById(1L)).thenReturn(Optional.of(logModel));
+		BDDMockito.when(logRepository.findById(11L)).thenReturn(Optional.of(logModel));
 		ResponseEntity<String> response = restTemplate.getForEntity("/logs/find-by-id/test", String.class);
 		Assertions.assertThat(response.getStatusCodeValue()).isEqualTo(400);
 	}
@@ -115,7 +125,7 @@ public class LogControllerTests {
 	@Test
 	public void findByIdHttpStatus405() {
 		BDDMockito.when(logRepository.findAll()).thenReturn(logs);
-		ResponseEntity<String> response = restTemplate.postForEntity("/logs/find-by-id/1", logModel, String.class );
+		ResponseEntity<String> response = restTemplate.postForEntity("/logs/find-by-id/11", logModel, String.class );
 		Assertions.assertThat(response.getStatusCodeValue()).isEqualTo(405);
 	}
 	
@@ -152,39 +162,44 @@ public class LogControllerTests {
 		Assertions.assertThat(response.getStatusCodeValue()).isEqualTo(405);
 	}
 	
-	
 	/**
 	 * FindByParams
 	 */
 	@Test
-	public void findByParamsHttpStatus200() {
-		String param = "192.168";
-		BDDMockito.when(logRepository.findLogModelsByIpIsContainingOrRequestIsContainingOrUserAgentIsContaining(param, param, param)).thenReturn(logs);
-		ResponseEntity<List> response = restTemplate.getForEntity("/logs/find-by-params/" + param, List.class);
-		Assertions.assertThat(response.getBody().size()).isEqualTo(10);
-		Assertions.assertThat(response.getStatusCodeValue()).isEqualTo(200);
+	public void findByParamsHttpStatus400() {
+		String param = "192.168.169.19";
+		HttpEntity<String> requestBodyString = new HttpEntity<String>(param);
+		BDDMockito.when(logRepository.findLogModelsByIpIsContainingOrRequestIsContainingOrUserAgentIsContaining(null, null, null)).thenReturn(logs);
+		ResponseEntity<String> exchange = restTemplate.exchange("/logs/find-by-params", HttpMethod.GET, null, String.class);
+		Assertions.assertThat(exchange.getStatusCodeValue()).isEqualTo(400);
 	}
 	
 	@Test
 	public void findByParamsHttpStatus401() {
 		restTemplate = restTemplate.withBasicAuth("test", "test");
-		BDDMockito.when(logRepository.findLogModelsByIpIsContainingOrRequestIsContainingOrUserAgentIsContaining("", "", "")).thenReturn(logs);
-		ResponseEntity<String> response = restTemplate.getForEntity("/logs/find-by-params", String.class);
-		Assertions.assertThat(response.getStatusCodeValue()).isEqualTo(401);
+		String param = "192.168.169.19";
+		HttpEntity<String> requestBodyString = new HttpEntity<String>(param);
+		BDDMockito.when(logRepository.findLogModelsByIpIsContainingOrRequestIsContainingOrUserAgentIsContaining(param, param, param)).thenReturn(logs);
+		ResponseEntity<String> exchange = restTemplate.exchange("/logs/find-by-params", HttpMethod.GET, requestBodyString, String.class);
+		Assertions.assertThat(exchange.getStatusCodeValue()).isEqualTo(401);
 	}
 	
 	@Test
 	public void findByParamsHttpStatus404() {
-		BDDMockito.when(logRepository.findLogModelsByIpIsContainingOrRequestIsContainingOrUserAgentIsContaining("", "", "")).thenReturn(logs);
-		ResponseEntity<String> response = restTemplate.getForEntity("/log/find-by-params", String.class);
-		Assertions.assertThat(response.getStatusCodeValue()).isEqualTo(404);
+		String param = "192.168.169.19";
+		HttpEntity<String> requestBodyString = new HttpEntity<String>(param);
+		BDDMockito.when(logRepository.findLogModelsByIpIsContainingOrRequestIsContainingOrUserAgentIsContaining(param, param, param)).thenReturn(null);
+		ResponseEntity<String> exchange = restTemplate.exchange("/logs/find-by-params/1", HttpMethod.GET, requestBodyString, String.class);
+		Assertions.assertThat(exchange.getStatusCodeValue()).isEqualTo(404);
 	}
 	
 	@Test
 	public void findByParamsHttpStatus405() {
-		BDDMockito.when(logRepository.findLogModelsByIpIsContainingOrRequestIsContainingOrUserAgentIsContaining("", "", "")).thenReturn(logs);
-		ResponseEntity<String> response = restTemplate.postForEntity("/logs/find-by-params/1", logs, String.class );
-		Assertions.assertThat(response.getStatusCodeValue()).isEqualTo(405);
+		String param = "192.168.169.19";
+		HttpEntity<String> requestBodyString = new HttpEntity<String>(param);
+		BDDMockito.when(logRepository.findLogModelsByIpIsContainingOrRequestIsContainingOrUserAgentIsContaining(param, param, param)).thenReturn(logs);
+		ResponseEntity<String> exchange = restTemplate.exchange("/logs/find-by-params", HttpMethod.POST, requestBodyString, String.class);
+		Assertions.assertThat(exchange.getStatusCodeValue()).isEqualTo(405);
 	}
 	
 	/**
@@ -269,14 +284,15 @@ public class LogControllerTests {
 	public void updateHttpStatus200() {
 		restTemplate = restTemplate.withBasicAuth("admin", "smartLog2020");
 		BDDMockito.when(logRepository.save(logModel)).thenReturn(logModel);
+		BDDMockito.when(logRepository.existsById(11L)).thenReturn(true);
 		ResponseEntity<LogModel> exchange = restTemplate.exchange("/logs/update", HttpMethod.PUT, request, LogModel.class);
-		Assertions.assertThat(exchange.getBody().getUserAgent()).isEqualTo(logModel.getUserAgent());
 		Assertions.assertThat(exchange.getStatusCodeValue()).isEqualTo(200);
 	}
 	
 	@Test
 	public void updateHttpStatus400() {
 		BDDMockito.when(logRepository.save(logModel)).thenReturn(logModel);
+		BDDMockito.when(logRepository.existsById(11L)).thenReturn(true);
 		ResponseEntity<LogModel> exchange = restTemplate.exchange("/logs/update", HttpMethod.PUT, null, LogModel.class);
 		Assertions.assertThat(exchange.getStatusCodeValue()).isEqualTo(400);
 	}
@@ -284,6 +300,7 @@ public class LogControllerTests {
 	@Test
 	public void updateHttpStatus403() {
 		BDDMockito.when(logRepository.save(logModel)).thenReturn(logModel);
+		BDDMockito.when(logRepository.existsById(11L)).thenReturn(true);
 		ResponseEntity<LogModel> exchange = restTemplate.exchange("/logs/update", HttpMethod.PUT, request, LogModel.class);
 		Assertions.assertThat(exchange.getStatusCodeValue()).isEqualTo(403);
 	}
@@ -292,6 +309,7 @@ public class LogControllerTests {
 	public void updateHttpStatus404() {
 		restTemplate = restTemplate.withBasicAuth("admin", "smartLog2020");
 		BDDMockito.when(logRepository.save(logModel)).thenReturn(logModel);
+		BDDMockito.when(logRepository.existsById(11L)).thenReturn(false);
 		ResponseEntity<LogModel> exchange = restTemplate.exchange("/log/update", HttpMethod.PUT, request, LogModel.class);
 		Assertions.assertThat(exchange.getStatusCodeValue()).isEqualTo(404);
 	}
@@ -300,6 +318,7 @@ public class LogControllerTests {
 	public void updateHttpStatus405() {
 		restTemplate = restTemplate.withBasicAuth("admin", "smartLog2020");
 		BDDMockito.when(logRepository.save(logModel)).thenReturn(logModel);
+		BDDMockito.when(logRepository.existsById(11L)).thenReturn(true);
 		ResponseEntity<LogModel> exchange = restTemplate.exchange("/logs/update", HttpMethod.POST, request, LogModel.class);
 		Assertions.assertThat(exchange.getStatusCodeValue()).isEqualTo(405);
 	}
@@ -310,40 +329,54 @@ public class LogControllerTests {
 	@Test
 	public void deleteHttpStatus200() {
 		restTemplate = restTemplate.withBasicAuth("admin", "smartLog2020");
-		BDDMockito.doNothing().when(logRepository).delete(logModel);
-		ResponseEntity<String> exchange = restTemplate.exchange("/logs/delete", HttpMethod.DELETE, request, String.class);
+		BDDMockito.doNothing().when(logRepository).deleteById(11L);
+		BDDMockito.when(logRepository.existsById(11L)).thenReturn(true);
+		ResponseEntity<String> exchange = restTemplate.exchange("/logs/delete/11", HttpMethod.DELETE, null, String.class);
 		Assertions.assertThat(exchange.getStatusCodeValue()).isEqualTo(200);
 	}
 	
 	@Test
-	public void deleteHttpStatus400() {
-		restTemplate = restTemplate.withBasicAuth("admin", "smartLog2020");
-		BDDMockito.doNothing().when(logRepository).delete(logModel);
-		ResponseEntity<String> exchange = restTemplate.exchange("/logs/delete", HttpMethod.DELETE, null, String.class);
-		Assertions.assertThat(exchange.getStatusCodeValue()).isEqualTo(400);
+	public void deleteHttpStatus401() {
+		restTemplate = restTemplate.withBasicAuth("test", "smartLog2020");
+		BDDMockito.doNothing().when(logRepository).deleteById(11L);
+		BDDMockito.when(logRepository.existsById(11L)).thenReturn(true);
+		ResponseEntity<String> exchange = restTemplate.exchange("/logs/delete/11", HttpMethod.DELETE, null, String.class);
+		Assertions.assertThat(exchange.getStatusCodeValue()).isEqualTo(401);
 	}
 	
 	@Test
 	public void deleteHttpStatus403() {
-		BDDMockito.doNothing().when(logRepository).delete(logModel);
-		ResponseEntity<String> exchange = restTemplate.exchange("/logs/delete", HttpMethod.DELETE, request, String.class);
+		BDDMockito.doNothing().when(logRepository).deleteById(11L);
+		BDDMockito.when(logRepository.existsById(11L)).thenReturn(true);
+		ResponseEntity<String> exchange = restTemplate.exchange("/logs/delete/11", HttpMethod.DELETE, null, String.class);
 		Assertions.assertThat(exchange.getStatusCodeValue()).isEqualTo(403);
 	}
 	
 	@Test
 	public void deleteHttpStatus404() {
 		restTemplate = restTemplate.withBasicAuth("admin", "smartLog2020");
-		BDDMockito.doNothing().when(logRepository).delete(logModel);
-		ResponseEntity<String> exchange = restTemplate.exchange("/log/delete", HttpMethod.DELETE, request, String.class);
+		BDDMockito.doNothing().when(logRepository).deleteById(11L);
+		BDDMockito.when(logRepository.existsById(11L)).thenReturn(false);
+		ResponseEntity<String> exchange = restTemplate.exchange("/log/delete/11", HttpMethod.DELETE, null, String.class);
 		Assertions.assertThat(exchange.getStatusCodeValue()).isEqualTo(404);
 	}
 	
 	@Test
 	public void deleteHttpStatus405() {
 		restTemplate = restTemplate.withBasicAuth("admin", "smartLog2020");
-		BDDMockito.doNothing().when(logRepository).delete(logModel);
-		ResponseEntity<String> exchange = restTemplate.exchange("/logs/delete", HttpMethod.GET, request, String.class);
+		BDDMockito.doNothing().when(logRepository).deleteById(11L);
+		BDDMockito.when(logRepository.existsById(11L)).thenReturn(true);
+		ResponseEntity<String> exchange = restTemplate.exchange("/logs/delete/11", HttpMethod.GET, null, String.class);
 		Assertions.assertThat(exchange.getStatusCodeValue()).isEqualTo(405);
+	}
+	
+	@Test
+	public void deleteHttpStatus500() {
+		restTemplate = restTemplate.withBasicAuth("admin", "smartLog2020");
+		BDDMockito.doNothing().when(logRepository).deleteById(11L);
+		BDDMockito.when(logRepository.existsById(11L)).thenReturn(true);
+		ResponseEntity<String> exchange = restTemplate.exchange("/logs/delete/test", HttpMethod.DELETE, null, String.class);
+		Assertions.assertThat(exchange.getStatusCodeValue()).isEqualTo(500);
 	}
 	
 }

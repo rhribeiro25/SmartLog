@@ -110,8 +110,8 @@ public class LogController {
 		}
 	}
 
-	@GetMapping("/find-by-params/{param}")
-	public ResponseEntity<Object> findByParams(@PathVariable String param) {
+	@GetMapping("/find-by-params")
+	public ResponseEntity<Object> findByParams(@RequestBody String param) {
 		try {
 			List<LogModel> logs = logService.findByParams(param);
 			if (logs == null || logs.size() == 0)
@@ -175,15 +175,15 @@ public class LogController {
 		}
 	}
 
-	@DeleteMapping("/delete")
+	@DeleteMapping("/delete/{id}")
 	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<Object> delete(@RequestBody LogModel logModel) {
+	public ResponseEntity<Object> delete(@PathVariable("id") String id) {
 		try {
-			if (!logService.existsById(logModel.getId())) {
+			if (!logService.existsById(Long.parseLong(id))) {
 				return new ResponseEntity<>(new ErrorPage(HttpStatus.NOT_FOUND, "Failed to delete, log not found!"),
 						HttpStatus.NOT_FOUND);
 			} else {
-				logService.delete(logModel);
+				logService.delete(Long.parseLong(id));
 				return new ResponseEntity<>("Successful to deleting log!", HttpStatus.OK);
 			}
 		} catch (Exception e) {

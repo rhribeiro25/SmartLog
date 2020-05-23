@@ -59,9 +59,8 @@ public class LogServiceImpl implements LogService {
 	}
 
 	@Override
-	public LogModel delete(LogModel logModel) {
-		logRepository.delete(logModel);
-		return logModel;
+	public void delete(Long id) {
+		logRepository.deleteById(id);
 	}
 	
 	@Override
