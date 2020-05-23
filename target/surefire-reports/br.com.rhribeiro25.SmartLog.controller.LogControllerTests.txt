@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: br.com.rhribeiro25.SmartLog.controller.LogControllerTests
 -------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.42 s - in br.com.rhribeiro25.SmartLog.controller.LogControllerTests
+Tests run: 33, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.622 s - in br.com.rhribeiro25.SmartLog.controller.LogControllerTests
