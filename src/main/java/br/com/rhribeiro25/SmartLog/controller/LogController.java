@@ -1,5 +1,6 @@
 package br.com.rhribeiro25.SmartLog.controller;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -145,13 +146,9 @@ public class LogController {
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<Object> save(@RequestBody LogModel logModel) {
 		try {
-			if (logService.existsById(logModel.getId())) {
-				return new ResponseEntity<>(new ErrorPage(HttpStatus.BAD_REQUEST, "Failed because Log already exists!"),
-						HttpStatus.BAD_REQUEST);
-			} else {
-				logService.saveOrUpdate(logModel);
-				return new ResponseEntity<>(logModel, HttpStatus.CREATED);
-			}
+			logModel.setCreatedAt(new Date());
+			logService.saveOrUpdate(logModel);
+			return new ResponseEntity<>(logModel, HttpStatus.CREATED);
 		} catch (Exception e) {
 			return new ResponseEntity<>(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
