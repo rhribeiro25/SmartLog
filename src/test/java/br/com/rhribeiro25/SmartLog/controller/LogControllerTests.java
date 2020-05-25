@@ -162,18 +162,6 @@ public class LogControllerTests {
 		Assertions.assertThat(response.getStatusCodeValue()).isEqualTo(405);
 	}
 	
-	/**
-	 * FindByParams
-	 */
-	@Test
-	public void findByParamsHttpStatus400() {
-		String param = "192.168.169.19";
-		HttpEntity<String> requestBodyString = new HttpEntity<String>(param);
-		BDDMockito.when(logRepository.findLogModelsByIpIsContainingOrRequestIsContainingOrUserAgentIsContaining(null, null, null)).thenReturn(logs);
-		ResponseEntity<String> exchange = restTemplate.exchange("/logs/find-by-params", HttpMethod.GET, null, String.class);
-		Assertions.assertThat(exchange.getStatusCodeValue()).isEqualTo(400);
-	}
-	
 	@Test
 	public void findByParamsHttpStatus401() {
 		restTemplate = restTemplate.withBasicAuth("test", "test");
@@ -191,15 +179,6 @@ public class LogControllerTests {
 		BDDMockito.when(logRepository.findLogModelsByIpIsContainingOrRequestIsContainingOrUserAgentIsContaining(param, param, param)).thenReturn(null);
 		ResponseEntity<String> exchange = restTemplate.exchange("/logs/find-by-params/1", HttpMethod.GET, requestBodyString, String.class);
 		Assertions.assertThat(exchange.getStatusCodeValue()).isEqualTo(404);
-	}
-	
-	@Test
-	public void findByParamsHttpStatus405() {
-		String param = "192.168.169.19";
-		HttpEntity<String> requestBodyString = new HttpEntity<String>(param);
-		BDDMockito.when(logRepository.findLogModelsByIpIsContainingOrRequestIsContainingOrUserAgentIsContaining(param, param, param)).thenReturn(logs);
-		ResponseEntity<String> exchange = restTemplate.exchange("/logs/find-by-params", HttpMethod.POST, requestBodyString, String.class);
-		Assertions.assertThat(exchange.getStatusCodeValue()).isEqualTo(405);
 	}
 	
 	/**

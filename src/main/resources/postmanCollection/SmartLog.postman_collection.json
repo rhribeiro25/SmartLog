@@ -195,7 +195,6 @@
 		{
 			"name": "find-by-params",
 			"protocolProfileBehavior": {
-				"disableBodyPruning": true,
 				"disabledSystemHeaders": {}
 			},
 			"request": {
@@ -216,17 +215,8 @@
 				},
 				"method": "GET",
 				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "192.168.234.82",
-					"options": {
-						"raw": {
-							"language": "text"
-						}
-					}
-				},
 				"url": {
-					"raw": "http://localhost:8080/logs/find-by-params",
+					"raw": "http://localhost:8080/logs/find-by-params/192.168.234.82",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -234,7 +224,8 @@
 					"port": "8080",
 					"path": [
 						"logs",
-						"find-by-params"
+						"find-by-params",
+						"192.168.234.82"
 					]
 				}
 			},

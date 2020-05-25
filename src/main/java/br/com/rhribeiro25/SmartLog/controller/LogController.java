@@ -111,8 +111,8 @@ public class LogController {
 		}
 	}
 
-	@GetMapping("/find-by-params")
-	public ResponseEntity<Object> findByParams(@RequestBody String param) {
+	@GetMapping("/find-by-params/{params}")
+	public ResponseEntity<Object> findByParams(@PathVariable("params") String param) {
 		try {
 			List<LogModel> logs = logService.findByParams(param);
 			if (logs == null || logs.size() == 0)
