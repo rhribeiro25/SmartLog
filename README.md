@@ -40,12 +40,12 @@ ENTREGAS
 
 Detalhes do desenvolvimento
 --------
-Será disponibilizado um postmanCollection para testes da API em "\src\main\resources\postmanCollection".
+Será disponibilizado um postmanCollection para testes da API em __"\src\main\resources\postmanCollection"__.
 Utilizar as autenticações abaixo diretamente no postman:
 ##### Leitura
-- User: user
-- password: smartLog2020
+- __User:__ user
+- __password:__ smartLog2020
 ##### Gravação
-- User: admin
-- password: smartLog2020
+- __User:__ admin
+- __password:__ smartLog2020
 
