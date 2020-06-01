@@ -5,6 +5,7 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
@@ -30,12 +31,6 @@ import br.com.rhribeiro25.SmartLog.spring.batch.LogFieldSetMapper;
 @EnableBatchProcessing
 public class SpringBatchConfig {
 
-	@Value("${file.csv.path}")
-	private String filePath;
-
-	@Value("${file.csv.name}")
-	private String fileName;
-
 	@Bean
 	public Job job(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory,
 			ItemReader<LogModel> itemReader, ItemProcessor<LogModel, LogModel> itemProcessor,
@@ -48,12 +43,13 @@ public class SpringBatchConfig {
 	}
 
 	@Bean
-	public FlatFileItemReader<LogModel> itemReader() {
+	@StepScope
+	public FlatFileItemReader<LogModel> itemReader(@Value("#{jobParameters[filePath]}") String filePath) {
 
 		FlatFileItemReader<LogModel> flatFileItemReader = new FlatFileItemReader<>();
-		flatFileItemReader.setResource(new FileSystemResource(filePath + fileName));
+		flatFileItemReader.setResource(new FileSystemResource(filePath));
 		flatFileItemReader.setName("CSV-Reader");
-		flatFileItemReader.setLinesToSkip(1);
+		flatFileItemReader.setLinesToSkip(0);
 		flatFileItemReader.setLineMapper(lineMapper());
 		return flatFileItemReader;
 	}

@@ -2,14 +2,27 @@ package br.com.rhribeiro25.SmartLog.service;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.batch.core.BatchStatus;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameter;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersInvalidException;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
+import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.rhribeiro25.SmartLog.model.LogModel;
 import br.com.rhribeiro25.SmartLog.repository.LogRepository;
 import br.com.rhribeiro25.SmartLog.utils.Formatting;
+
 
 /**
  * @author Renan Ribeiro
@@ -19,6 +32,12 @@ import br.com.rhribeiro25.SmartLog.utils.Formatting;
 @Service
 public class LogServiceImpl implements LogService {
 
+	@Autowired
+	JobLauncher jobLauncher;
+	
+	@Autowired
+	Job job;
+	
 	@Autowired
 	private LogRepository logRepository;
 
@@ -35,8 +54,13 @@ public class LogServiceImpl implements LogService {
 	}
 
 	@Override
-	public List<LogModel> findByParams(String param) {
-		return logRepository.findLogModelsByIpIsContainingOrRequestIsContainingOrUserAgentIsContaining(param, param, param);
+	public List<LogModel> findByIp(String ip) {
+		return logRepository.findLogModelsByIpIsContaining(ip);
+	}
+	
+	@Override
+	public List<LogModel> findByStatus(Integer status) {
+		return logRepository.findLogModelsByStatus(status);
 	}
 
 	@Override
@@ -66,6 +90,17 @@ public class LogServiceImpl implements LogService {
 	@Override
 	public boolean existsById(Long id) {
 		return logRepository.existsById(id);
+	}
+	
+	@Override
+	public BatchStatus runBatch(Long now, String logFullPath) throws JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, JobParametersInvalidException {
+		Map<String, JobParameter> maps = new HashMap<>();
+		maps.put("time", new JobParameter(now));
+		maps.put("filePath", new JobParameter(logFullPath));
+		JobParameters parameters = new JobParameters(maps);
+		JobExecution jobExecution = jobLauncher.run(job, parameters);
+		BatchStatus status = jobExecution.getStatus();
+		return status;
 	}
 
 }

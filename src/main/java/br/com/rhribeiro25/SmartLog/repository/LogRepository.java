@@ -14,7 +14,9 @@ import br.com.rhribeiro25.SmartLog.model.LogModel;
 
 public interface LogRepository extends JpaRepository<LogModel, Long> {
 
-	public List<LogModel> findLogModelsByIpIsContainingOrRequestIsContainingOrUserAgentIsContaining(String ip, String request, String userAgent);
+	public List<LogModel> findLogModelsByIpIsContaining(String ip);
+	
+	public List<LogModel> findLogModelsByStatus(Integer status);
 	
 	public List<LogModel> findLogModelsByCreatedAtBetween(Date from, Date to);
 

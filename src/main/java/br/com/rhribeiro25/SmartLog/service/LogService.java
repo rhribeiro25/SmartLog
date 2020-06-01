@@ -2,6 +2,12 @@ package br.com.rhribeiro25.SmartLog.service;
 
 import java.util.List;
 
+import org.springframework.batch.core.BatchStatus;
+import org.springframework.batch.core.JobParametersInvalidException;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
+import org.springframework.batch.core.repository.JobRestartException;
+
 import br.com.rhribeiro25.SmartLog.model.LogModel;
 
 /**
@@ -22,8 +28,13 @@ public interface LogService {
 
 	public List<LogModel> findByCreatedAtBetween(String from, String to);
 	
-	public List<LogModel> findByParams(String param);
-
 	public boolean existsById(Long id);
+
+	public List<LogModel> findByIp(String ip);
+
+	public BatchStatus runBatch(Long now, String logFullPath) throws JobExecutionAlreadyRunningException, JobRestartException,
+			JobInstanceAlreadyCompleteException, JobParametersInvalidException;
+
+	public List<LogModel> findByStatus(Integer status);
 
 }
