@@ -3,6 +3,8 @@ package br.com.rhribeiro25.SmartLog.controller;
 import java.util.Date;
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
@@ -14,6 +16,7 @@ import org.springframework.boot.web.server.ErrorPage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,9 +28,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import br.com.rhribeiro25.SmartLog.error.exception.NotFoundException;
 import br.com.rhribeiro25.SmartLog.model.LogModel;
 import br.com.rhribeiro25.SmartLog.service.LogService;
 import br.com.rhribeiro25.SmartLog.utils.FilesIO;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Renan Ribeiro
@@ -36,6 +41,7 @@ import br.com.rhribeiro25.SmartLog.utils.FilesIO;
 
 @RestController
 @RequestMapping("/logs")
+@Slf4j
 public class LogController {
 
 	@Autowired
@@ -46,6 +52,7 @@ public class LogController {
 
 	@PostMapping("/create-by-batch")
 	@PreAuthorize("hasRole('ADMIN')")
+	@Transactional(rollbackFor = Exception.class)
 	public ResponseEntity<Object> saveLogsFromFile(@RequestParam MultipartFile log) {
 
 		Long now = System.currentTimeMillis();
@@ -58,7 +65,7 @@ public class LogController {
 
 			// Run Job
 			BatchStatus status = logService.runBatch(now, logFullPath);
-			
+
 			if (status == BatchStatus.COMPLETED)
 				return new ResponseEntity<>(status.toString(), HttpStatus.CREATED);
 			else if (status == BatchStatus.FAILED)
@@ -67,7 +74,7 @@ public class LogController {
 			else
 				return new ResponseEntity<>(new ErrorPage(HttpStatus.BAD_REQUEST, status.toString()),
 						HttpStatus.BAD_REQUEST);
-			
+
 		} catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
 				| JobParametersInvalidException | RuntimeException e) {
 			return new ResponseEntity<>(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()),
@@ -77,31 +84,17 @@ public class LogController {
 	}
 
 	@GetMapping("/find-by-id/{id}")
-	public ResponseEntity<Object> findById(@PathVariable("id") Long id) {
-		try {
-			LogModel logModel = logService.findById(id);
-			if (logModel == null) {
-				return new ResponseEntity<>(new ErrorPage(HttpStatus.NOT_FOUND, "Failed to find Log!"),
-						HttpStatus.NOT_FOUND);
-			} else {
-				return new ResponseEntity<>(logModel, HttpStatus.OK);
-			}
-		} catch (Exception e) {
-			return new ResponseEntity<>(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()),
-					HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+	public ResponseEntity<?> findById(@PathVariable("id") Long id) {
+		LogModel log = this.returnExistsLog(id);
+		return new ResponseEntity<>(log, HttpStatus.OK);
 	}
 
 	@GetMapping("/find-all")
-	public ResponseEntity<Object> findAll() {
+	public ResponseEntity<?> findAll() {
 		try {
 			List<LogModel> logs = logService.findAll();
-			if (logs == null || logs.size() == 0) {
-				return new ResponseEntity<>(new ErrorPage(HttpStatus.NOT_FOUND, "Failed to find Logs!"),
-						HttpStatus.NOT_FOUND);
-			} else {
-				return new ResponseEntity<>(logs, HttpStatus.OK);
-			}
+			this.verifyExistsLogs(logs);
+			return new ResponseEntity<>(logs, HttpStatus.OK);
 		} catch (Exception e) {
 			return new ResponseEntity<>(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
@@ -109,31 +102,23 @@ public class LogController {
 	}
 
 	@GetMapping("/find-by-ip/{ip}")
-	public ResponseEntity<Object> findByIp(@PathVariable("ip") String ip) {
+	public ResponseEntity<?> findByIp(@PathVariable("ip") String ip) {
 		try {
 			List<LogModel> logs = logService.findByIp(ip);
-			if (logs == null || logs.size() == 0) {
-				return new ResponseEntity<>(new ErrorPage(HttpStatus.NOT_FOUND, "Failed to find Logs!"),
-						HttpStatus.NOT_FOUND);
-			} else {
-				return new ResponseEntity<>(logs, HttpStatus.OK);
-			}
+			this.verifyExistsLogs(logs);
+			return new ResponseEntity<>(logs, HttpStatus.OK);
 		} catch (Exception e) {
 			return new ResponseEntity<>(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
 	@GetMapping("/find-by-status/{statusLog}")
-	public ResponseEntity<Object> findByStatus(@PathVariable("statusLog") Integer statusLog) {
+	public ResponseEntity<?> findByStatus(@PathVariable("statusLog") Integer statusLog) {
 		try {
 			List<LogModel> logs = logService.findByStatus(statusLog);
-			if (logs == null || logs.size() == 0) {
-				return new ResponseEntity<>(new ErrorPage(HttpStatus.NOT_FOUND, "Failed to find Logs!"),
-						HttpStatus.NOT_FOUND);
-			} else {
-				return new ResponseEntity<>(logs, HttpStatus.OK);
-			}
+			this.verifyExistsLogs(logs);
+			return new ResponseEntity<>(logs, HttpStatus.OK);
 		} catch (Exception e) {
 			return new ResponseEntity<>(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
@@ -141,16 +126,12 @@ public class LogController {
 	}
 
 	@GetMapping("/find-by-createdat-between/{from}/{to}")
-	public ResponseEntity<Object> findByCreatedAtBetween(@PathVariable("from") String from,
+	public ResponseEntity<?> findByCreatedAtBetween(@PathVariable("from") String from,
 			@PathVariable("to") String to) {
 		try {
 			List<LogModel> logs = logService.findByCreatedAtBetween(from, to);
-			if (logs == null || logs.size() == 0) {
-				return new ResponseEntity<>(new ErrorPage(HttpStatus.NOT_FOUND, "Failed to find Logs!"),
-						HttpStatus.NOT_FOUND);
-			} else {
-				return new ResponseEntity<>(logs, HttpStatus.OK);
-			}
+			this.verifyExistsLogs(logs);
+			return new ResponseEntity<>(logs, HttpStatus.OK);
 		} catch (Exception e) {
 			return new ResponseEntity<>(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
@@ -159,11 +140,11 @@ public class LogController {
 
 	@PostMapping("/create")
 	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<Object> save(@RequestBody LogModel logModel) {
+	public ResponseEntity<?> save(@RequestBody @Valid LogModel log) {
 		try {
-			logModel.setCreatedAt(new Date());
-			logService.saveOrUpdate(logModel);
-			return new ResponseEntity<>(logModel, HttpStatus.CREATED);
+			log.setCreatedAt(new Date());
+			logService.saveOrUpdate(log);
+			return new ResponseEntity<>(log, HttpStatus.CREATED);
 		} catch (Exception e) {
 			return new ResponseEntity<>(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
@@ -172,15 +153,11 @@ public class LogController {
 
 	@PutMapping("/update")
 	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<Object> update(@RequestBody LogModel logModel) {
+	public ResponseEntity<?> update(@RequestBody LogModel log) {
 		try {
-			if (!logService.existsById(logModel.getId())) {
-				return new ResponseEntity<>(new ErrorPage(HttpStatus.NOT_FOUND, "Failed to find Log!"),
-						HttpStatus.NOT_FOUND);
-			} else {
-				logService.saveOrUpdate(logModel);
-				return new ResponseEntity<>(logModel, HttpStatus.OK);
-			}
+			this.verifyExistsLog(log.getId());
+			logService.saveOrUpdate(log);
+			return new ResponseEntity<>(log, HttpStatus.OK);
 		} catch (Exception e) {
 			return new ResponseEntity<>(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
@@ -189,18 +166,31 @@ public class LogController {
 
 	@DeleteMapping("/delete/{id}")
 	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<Object> delete(@PathVariable("id") String id) {
+	public ResponseEntity<?> delete(@PathVariable("id") String id) {
 		try {
-			if (!logService.existsById(Long.parseLong(id))) {
-				return new ResponseEntity<>(new ErrorPage(HttpStatus.NOT_FOUND, "Failed to delete, log not found!"),
-						HttpStatus.NOT_FOUND);
-			} else {
-				logService.delete(Long.parseLong(id));
-				return new ResponseEntity<>("Successful to delet log!", HttpStatus.OK);
-			}
+			this.verifyExistsLog(Long.parseLong(id));
+			logService.delete(Long.parseLong(id));
+			return new ResponseEntity<>("Successful to delet log!", HttpStatus.OK);
 		} catch (Exception e) {
 			return new ResponseEntity<>(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
+
+	private LogModel returnExistsLog(Long id) {
+		LogModel log = logService.findById(id);
+		if (log == null)
+			throw new NotFoundException("Log not found by ID: " + id);
+		return log;
+	}
+	private void verifyExistsLog(Long id) {
+		if (logService.findById(id) == null)
+			throw new NotFoundException("Log not found by ID: " + id);
+	}
+
+	private void verifyExistsLogs(List<LogModel> logs) {
+		if (logs == null || logs.size() == 0)
+			throw new NotFoundException("Logs not found");
+	}
+
 }

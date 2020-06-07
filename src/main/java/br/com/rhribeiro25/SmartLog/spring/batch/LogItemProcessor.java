@@ -19,7 +19,7 @@ public class LogItemProcessor implements ItemProcessor<LogModel, LogModel> {
 
 	@Override
 	public LogModel process(LogModel log) throws Exception {
-		LogModel logConverted = new LogModel(log.getCreatedAt(), log.getIp(), log.getRequest(), log.getStatus(),
+		LogModel logConverted = new LogModel(null, log.getCreatedAt(), log.getIp(), log.getRequest(), log.getStatus(),
 				log.getUserAgent());
 		logger.info("Log converting (" + log + ") into (" + logConverted + ")");
 		return logConverted;

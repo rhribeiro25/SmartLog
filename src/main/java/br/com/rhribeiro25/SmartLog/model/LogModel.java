@@ -1,12 +1,14 @@
 package br.com.rhribeiro25.SmartLog.model;
 
-import java.util.Date;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.util.Date;
 
 /**
  * @author Renan Ribeiro
@@ -14,86 +16,33 @@ import javax.persistence.Table;
  */
 
 @Entity
-@Table(name = "logModels")
+@Table(name = "logs")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class LogModel {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long id;
-	private Date createdAt;
-	private String ip;
-	private String request;
-	private Integer status;
-	private String userAgent;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
 
-	public LogModel() {
-	}
+    @NotNull(message = "{createdAt.not.null}")
+    private Date createdAt;
 
-	public LogModel(Long id, Date createdAt, String ip, String request, Integer status, String userAgent) {
-		this.id = id;
-		this.createdAt = createdAt;
-		this.ip = ip;
-		this.request = request;
-		this.status = status;
-		this.userAgent = userAgent;
-	}
+    @NotBlank(message = "{ip.not.blank}")
+    @Size(min = 9, max = 15, message = "{ip.size}")
+    private String ip;
 
-	public LogModel(Date createdAt, String ip, String request, Integer status, String userAgent) {
-		this.createdAt = createdAt;
-		this.ip = ip;
-		this.request = request;
-		this.status = status;
-		this.userAgent = userAgent;
-	}
+    @NotBlank(message = "{request.not.blank}")
+    @Size(min = 12, max = 48, message = "{request.size}")
+    private String request;
 
-	@Override
-	public String toString() {
-		return "LogModel [id=" + id + ", createdAt=" + createdAt + ", ip=" + ip + ", request=" + request + ", status="
-				+ status + ", userAgent=" + userAgent + "]";
-	}
+    @NotNull(message = "{status.not.null}")
+    @Size(min = 100, max = 511, message = "{status.size}")
+    private Integer status;
 
-	public Long getId() {
-		return id;
-	}
-
-	public Date getCreatedAt() {
-		return createdAt;
-	}
-
-	public void setCreatedAt(Date createdAt) {
-		this.createdAt = createdAt;
-	}
-
-	public String getIp() {
-		return ip;
-	}
-
-	public void setIp(String ip) {
-		this.ip = ip;
-	}
-
-	public String getRequest() {
-		return request;
-	}
-
-	public void setRequest(String request) {
-		this.request = request;
-	}
-
-	public Integer getStatus() {
-		return status;
-	}
-
-	public void setStatus(Integer status) {
-		this.status = status;
-	}
-
-	public String getUserAgent() {
-		return userAgent;
-	}
-
-	public void setUserAgent(String userAgent) {
-		this.userAgent = userAgent;
-	}
+    @NotBlank(message = "{user.agent.not.blank}")
+    @Size(min = 24, max = 256, message = "{user.agent.size}")
+    private String userAgent;
 
 }

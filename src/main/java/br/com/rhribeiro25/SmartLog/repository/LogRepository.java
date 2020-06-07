@@ -11,7 +11,6 @@ import br.com.rhribeiro25.SmartLog.model.LogModel;
  * @author Renan Ribeiro
  * @date 18/05/2020.
  */
-
 public interface LogRepository extends JpaRepository<LogModel, Long> {
 
 	public List<LogModel> findLogModelsByIpIsContaining(String ip);

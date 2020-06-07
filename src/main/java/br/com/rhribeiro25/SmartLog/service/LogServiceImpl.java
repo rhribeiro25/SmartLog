@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import br.com.rhribeiro25.SmartLog.model.LogModel;
 import br.com.rhribeiro25.SmartLog.repository.LogRepository;
 import br.com.rhribeiro25.SmartLog.utils.Formatting;
+import lombok.extern.slf4j.Slf4j;
 
 
 /**
@@ -30,6 +31,7 @@ import br.com.rhribeiro25.SmartLog.utils.Formatting;
  */
 
 @Service
+@Slf4j
 public class LogServiceImpl implements LogService {
 
 	@Autowired

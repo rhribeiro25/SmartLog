@@ -1,5 +1,3 @@
-br\com\rhribeiro25\SmartLog\controller\LogControllerTests.class
 br\com\rhribeiro25\SmartLog\service\LogServiceTests.class
 br\com\rhribeiro25\SmartLog\SmartLogApplicationTests.class
 br\com\rhribeiro25\SmartLog\repository\LogRepositoryTests.class
-br\com\rhribeiro25\SmartLog\controller\LogControllerTests$SpringBootTestConfig.class

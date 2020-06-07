@@ -24,7 +24,7 @@ public class LogFieldSetMapper implements FieldSetMapper<LogModel> {
 			String request = fieldSet.readString(2);
 			Integer status = fieldSet.readInt(3);
 			String userAgent = fieldSet.readString(4);
-			logItem = new LogModel(createdAt, ip, request, status, userAgent);
+			logItem = new LogModel(null, createdAt, ip, request, status, userAgent);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
